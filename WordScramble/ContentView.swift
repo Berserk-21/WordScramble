@@ -32,8 +32,12 @@ struct ContentView: View {
             }
             .navigationTitle(rootWord)
             .onSubmit {
+                startGame()
                 addNewWord()
             }
+            .onAppear(perform: {
+                startGame()
+            })
         }
     }
     
@@ -49,6 +53,18 @@ struct ContentView: View {
             usedWords.insert(answer, at: 0)
         }
         newWord = ""
+    }
+    
+    func startGame() {
+        guard let url = Bundle.main.url(forResource: "start", withExtension: "txt") else { return }
+        
+        do {
+            let string = try String(contentsOf: url)
+            let allWords = string.components(separatedBy: "\n")
+            rootWord = allWords.randomElement() ?? "silkworm"
+        } catch {
+            fatalError("There was an error getting start.txt")
+        }
     }
 }
 
