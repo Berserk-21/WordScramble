@@ -9,9 +9,17 @@ import SwiftUI
 
 struct ContentView: View {
     
+    // MARK: - Properties
+    
     @State private var usedWords = [String]()
     @State private var rootWord = ""
     @State private var newWord = ""
+    
+    @State private var errorTitle = ""
+    @State private var errorMessage = ""
+    @State private var showingError = false
+    
+    // MARK: - Views
     
     var body: some View {
         NavigationStack {
@@ -19,6 +27,7 @@ struct ContentView: View {
                 Section {
                     TextField("Enter your word", text: $newWord)
                         .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
                 }
                 
                 Section {
@@ -30,9 +39,13 @@ struct ContentView: View {
                     }
                 }
             }
+            .alert(errorTitle, isPresented: $showingError) {
+                Button("OK") {}
+            } message: {
+                Text(errorMessage)
+            }
             .navigationTitle(rootWord)
             .onSubmit {
-                startGame()
                 addNewWord()
             }
             .onAppear(perform: {
@@ -41,18 +54,65 @@ struct ContentView: View {
         }
     }
     
+    // MARK: - Core Methods
+    
     func addNewWord() {
         
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
         guard answer.count > 0 else { return }
         
-        guard !usedWords.contains(answer) else { return }
+        guard isExistingWord(answer) else {
+            presentAlert(title: "Not recognized", message: "You can't just make up new words, please refer to dictionnaries 😜")
+            return }
+        
+        guard isNotUsed(answer) else {
+            presentAlert(title: "Already used", message: "You already added this word, try another one !")
+            return }
+        
+        guard isPossible(answer) else { 
+            presentAlert(title: "Not possible", message: "You can't spell that word with the letters from \(rootWord)")
+            return }
         
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
         newWord = ""
+    }
+    
+    func isExistingWord(_ word: String) -> Bool {
+        
+        let checker = UITextChecker()
+        let range = NSRange(location: 0, length: word.count)
+        let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+        
+        return misspelledRange.location == NSNotFound
+    }
+    
+    func isNotUsed(_ word: String) -> Bool {
+        return !usedWords.contains(word)
+    }
+    
+    func isPossible(_ word: String) -> Bool {
+        
+        var tempWord = rootWord
+        
+        for letter in word {
+            if let index = tempWord.firstIndex(of: letter) {
+                tempWord.remove(at: index)
+            } else {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    func presentAlert(title: String, message: String) {
+        
+        errorTitle = title
+        errorMessage = message
+        showingError = true
     }
     
     func startGame() {
