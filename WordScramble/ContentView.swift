@@ -11,6 +11,7 @@ struct ContentView: View {
     
     // MARK: - Properties
     
+    @State private var allWords = [String]()
     @State private var usedWords = [String]()
     @State private var rootWord = ""
     @State private var newWord = ""
@@ -46,7 +47,7 @@ struct ContentView: View {
             }
             .toolbar {
                 Button("Restart") {
-                    startGame()
+                    restart()
                 }
             }
             .navigationTitle(rootWord)
@@ -132,11 +133,17 @@ struct ContentView: View {
         do {
             let string = try String(contentsOf: url)
             let allWords = string.components(separatedBy: "\n")
-            rootWord = allWords.randomElement() ?? "silkworm"
-            usedWords = []
+            self.allWords = allWords
+            restart()
         } catch {
             fatalError("There was an error getting start.txt")
         }
+    }
+    
+    func restart() {
+        
+        rootWord = allWords.randomElement() ?? "silkworm"
+        usedWords = []
     }
 }
 
