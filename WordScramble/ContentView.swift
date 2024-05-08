@@ -44,6 +44,11 @@ struct ContentView: View {
             } message: {
                 Text(errorMessage)
             }
+            .toolbar {
+                Button("Restart") {
+                    startGame()
+                }
+            }
             .navigationTitle(rootWord)
             .onSubmit {
                 addNewWord()
@@ -128,6 +133,7 @@ struct ContentView: View {
             let string = try String(contentsOf: url)
             let allWords = string.components(separatedBy: "\n")
             rootWord = allWords.randomElement() ?? "silkworm"
+            usedWords = []
         } catch {
             fatalError("There was an error getting start.txt")
         }
