@@ -60,10 +60,16 @@ struct ContentView: View {
         
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        guard answer.count > 0 else { return }
+        guard answer != rootWord else {
+            presentAlert(title: "Nice try ! 😵‍💫", message: "The purpose of the game is to create different words with the letters of the one proposed.")
+            return }
+        
+        guard answer.count > 2 else { 
+            presentAlert(title: "Too short", message: "Words must contain at least 3 letters.")
+            return }
         
         guard isExistingWord(answer) else {
-            presentAlert(title: "Not recognized", message: "You can't just make up new words, please refer to dictionnaries 😜")
+            presentAlert(title: "Not recognized", message: "You can't just make up new words, please refer to dictionnaries 😜.")
             return }
         
         guard isNotUsed(answer) else {
@@ -71,7 +77,7 @@ struct ContentView: View {
             return }
         
         guard isPossible(answer) else { 
-            presentAlert(title: "Not possible", message: "You can't spell that word with the letters from \(rootWord)")
+            presentAlert(title: "Not possible", message: "You can't spell that word with the letters from \(rootWord).")
             return }
         
         withAnimation {
