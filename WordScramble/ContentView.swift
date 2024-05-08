@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var rootWord = ""
     @State private var newWord = ""
     
+    @State private var currentScore = 0
+    
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
@@ -40,16 +42,34 @@ struct ContentView: View {
                     }
                 }
             }
+            
             .alert(errorTitle, isPresented: $showingError) {
                 Button("OK") {}
             } message: {
                 Text(errorMessage)
             }
+            
             .toolbar {
-                Button("Restart") {
-                    restart()
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Restart") {
+                        restart()
+                    }
                 }
             }
+            
+            .toolbar {
+                Button("Next") {
+                    next()
+                }
+            }
+            
+            .toolbar {
+                ToolbarItem(placement: .bottomBar) {
+                    Text("Score: \(currentScore)")
+                        .font(.title)
+                }
+            }
+            
             .navigationTitle(rootWord)
             .onSubmit {
                 addNewWord()
@@ -89,7 +109,19 @@ struct ContentView: View {
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
+        currentScore = calculateWordScore(answer)
         newWord = ""
+    }
+    
+    func calculateWordScore(_ word: String) -> Int {
+        
+        var score = currentScore
+        
+        score += word.count
+        
+        score += usedWords.count
+        
+        return score
     }
     
     func isExistingWord(_ word: String) -> Bool {
@@ -141,6 +173,13 @@ struct ContentView: View {
     }
     
     func restart() {
+        
+        rootWord = allWords.randomElement() ?? "silkworm"
+        usedWords = []
+        currentScore = 0
+    }
+    
+    func next() {
         
         rootWord = allWords.randomElement() ?? "silkworm"
         usedWords = []
